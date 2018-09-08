@@ -13,6 +13,10 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+// based on https://stackoverflow.com/questions/11515469/how-do-i-print-vector-values-of-type-glmvec3-that-have-been-passed-by-referenc
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -21,6 +25,10 @@
 
 Load< MeshBuffer > crates_meshes(LoadTagDefault, [](){
 	return new MeshBuffer(data_path("crates.pnc"));
+});
+
+Load< MeshBuffer > walk_mesh(LoadTagDefault, [](){
+	return new MeshBuffer(data_path("walk_mesh.pnc"));
 });
 
 Load< GLuint > crates_meshes_for_vertex_color_program(LoadTagDefault, [](){
@@ -38,6 +46,21 @@ CratesMode::CratesMode() {
 	//----------------
 	//set up scene:
 	//TODO: this should load the scene from a file!
+	{
+		struct Transform {
+			uint32_t parent_ref;
+			uint32_t name_begin, name_end;
+			glm::vec3 position;
+			glm::quat rotation;
+			glm::vec3 scale;
+		};
+		static_assert(sizeof(Transform) == 1*4+2*4+3*4+4*4+3*4, "Index entry should be packed");
+		std::string const &filename = data_path("test_box.scene");
+		std::ifstream file(filename, std::ios::binary);
+		std::vector<Transform> data;
+		read_chunk(file, "xfh0", &data);
+		std::cout<<glm::to_string(data[0].position)<<std::endl;
+	}
 
 	auto attach_object = [this](Scene::Transform *transform, std::string const &name) {
 		Scene::Object *object = scene.new_object(transform);

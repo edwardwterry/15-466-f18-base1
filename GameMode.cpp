@@ -20,20 +20,24 @@
 #include <random>
 
 
-MeshBuffer::Mesh tile_mesh;
-MeshBuffer::Mesh cursor_mesh;
-MeshBuffer::Mesh doll_mesh;
-MeshBuffer::Mesh egg_mesh;
-MeshBuffer::Mesh cube_mesh;
+// MeshBuffer::Mesh tile_mesh;
+// MeshBuffer::Mesh cursor_mesh;
+// MeshBuffer::Mesh doll_mesh;
+// MeshBuffer::Mesh egg_mesh;
+// MeshBuffer::Mesh cube_mesh;
+
+MeshBuffer::Mesh phone_bank_mesh;
 
 Load< MeshBuffer > meshes(LoadTagDefault, [](){
-	MeshBuffer const *ret = new MeshBuffer(data_path("meshes.pnc"));
+	MeshBuffer const *ret = new MeshBuffer(data_path("phone-bank.pnc"));
 
-	tile_mesh = ret->lookup("Tile");
-	cursor_mesh = ret->lookup("Cursor");
-	doll_mesh = ret->lookup("Doll");
-	egg_mesh = ret->lookup("Egg");
-	cube_mesh = ret->lookup("Cube");
+	// tile_mesh = ret->lookup("Tile");
+	// cursor_mesh = ret->lookup("Cursor");
+	// doll_mesh = ret->lookup("Doll");
+	// egg_mesh = ret->lookup("Egg");
+	// cube_mesh = ret->lookup("Cube");
+
+	phone_bank_mesh = ret->lookup("Plane");
 
 	return ret;
 });
@@ -50,7 +54,8 @@ GameMode::GameMode() {
 	board_rotations.reserve(board_size.x * board_size.y);
 	std::mt19937 mt(0xbead1234);
 
-	std::vector< MeshBuffer::Mesh const * > meshes{ &doll_mesh, &egg_mesh, &cube_mesh };
+	// std::vector< MeshBuffer::Mesh const * > meshes{ &doll_mesh, &egg_mesh, &cube_mesh };
+	std::vector< MeshBuffer::Mesh const * > meshes{ &phone_bank_mesh };
 
 	for (uint32_t i = 0; i < board_size.x * board_size.y; ++i) {
 		board_meshes.emplace_back(meshes[mt()%meshes.size()]);
@@ -111,37 +116,76 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		}
 	}
 
+	if (evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) {
+		if (evt.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+			controls.interact = (evt.type == SDL_KEYDOWN);
+			return true;
+		}	
+	}
+
 	return false;
 }
 
 void GameMode::update(float elapsed) {
-	//if the roll keys are pressed, rotate everything on the same row or column as the cursor:
-	glm::quat dr = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	float amt = elapsed * 1.0f;
-	if (controls.roll_left) {
-		dr = glm::angleAxis(amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
-	}
-	if (controls.roll_right) {
-		dr = glm::angleAxis(-amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
-	}
-	if (controls.roll_up) {
-		dr = glm::angleAxis(amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
-	}
-	if (controls.roll_down) {
-		dr = glm::angleAxis(-amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
-	}
-	if (dr != glm::quat()) {
-		for (uint32_t x = 0; x < board_size.x; ++x) {
-			glm::quat &r = board_rotations[cursor.y * board_size.x + x];
-			r = glm::normalize(dr * r);
-		}
-		for (uint32_t y = 0; y < board_size.y; ++y) {
-			if (y != cursor.y) {
-				glm::quat &r = board_rotations[y * board_size.x + cursor.x];
-				r = glm::normalize(dr * r);
-			}
-		}
-	}
+	// //if the roll keys are pressed, rotate everything on the same row or column as the cursor:
+	// glm::quat dr = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+	// float amt = elapsed * 1.0f;
+	// if (controls.roll_left) {
+	// 	dr = glm::angleAxis(amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
+	// }
+	// if (controls.roll_right) {
+	// 	dr = glm::angleAxis(-amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
+	// }
+	// if (controls.roll_up) {
+	// 	dr = glm::angleAxis(amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
+	// }
+	// if (controls.roll_down) {
+	// 	dr = glm::angleAxis(-amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
+	// }
+	// if (dr != glm::quat()) {
+	// 	for (uint32_t x = 0; x < board_size.x; ++x) {
+	// 		glm::quat &r = board_rotations[cursor.y * board_size.x + x];
+	// 		r = glm::normalize(dr * r);
+	// 	}
+	// 	for (uint32_t y = 0; y < board_size.y; ++y) {
+	// 		if (y != cursor.y) {
+	// 			glm::quat &r = board_rotations[y * board_size.x + cursor.x];
+	// 			r = glm::normalize(dr * r);
+	// 		}
+	// 	}
+	// }
+
+	// if (controls.interact) {
+	// 	// which is the closest light?
+	// 	// start by assuming you're out of range of any
+	// 	uint32_t closest_light = -1;
+	// 	for (uint32_t i = 0; i < num_lights; i++){
+	// 		// get the distance
+	// 		// ASSUMPTION: interaction_distance << 0.5*(distance between closest lights)
+	// 		if (glm::distance(player.position, lights[i].position) <= interaction_distance){
+	// 			// and assign the index
+	// 			closest_light = i;
+	// 		}
+	// 	}
+	// 	// if you were within range of a light
+	// 	if (closest_light >= 0){
+	// 		// add it to the vector of lights you interacted with
+	// 		interaction_record.emplace_back(closest_light);
+	// 		// TODO: play its corresponding sound
+	// 	}
+	// }
+
+	// // compare this to the reference vector
+	// // if the last light you interacted with is the same as the corresponding one in the ref sequence
+	// if (interaction_record.back() == light_sequence[interaction_record.size()]) {
+	// 	// if you are at the last in the sequence
+	// 	if (interaction_record.size() == sequence_length){
+	// 		add_to_sequence();
+	// 	}
+	// } else {
+	// 	reset_sequence();
+	// 	// TODO: play fail sound
+	// }
 }
 
 void GameMode::draw(glm::uvec2 const &drawable_size) {
@@ -203,33 +247,33 @@ void GameMode::draw(glm::uvec2 const &drawable_size) {
 		glDrawArrays(GL_TRIANGLES, mesh.start, mesh.count);
 	};
 
-	for (uint32_t y = 0; y < board_size.y; ++y) {
-		for (uint32_t x = 0; x < board_size.x; ++x) {
-			draw_mesh(tile_mesh,
-				glm::mat4(
-					1.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 1.0f, 0.0f,
-					x+0.5f, y+0.5f,-0.5f, 1.0f
-				)
-			);
-			draw_mesh(*board_meshes[y*board_size.x+x],
-				glm::mat4(
-					1.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 1.0f, 0.0f,
-					x+0.5f, y+0.5f, 0.0f, 1.0f
-				)
-				* glm::mat4_cast(board_rotations[y*board_size.x+x])
-			);
-		}
-	}
-	draw_mesh(cursor_mesh,
+	// for (uint32_t y = 0; y < board_size.y; ++y) {
+	// 	for (uint32_t x = 0; x < board_size.x; ++x) {
+	// 		draw_mesh(tile_mesh,
+	// 			glm::mat4(
+	// 				1.0f, 0.0f, 0.0f, 0.0f,
+	// 				0.0f, 1.0f, 0.0f, 0.0f,
+	// 				0.0f, 0.0f, 1.0f, 0.0f,
+	// 				x+0.5f, y+0.5f,-0.5f, 1.0f
+	// 			)
+	// 		);
+	// 		draw_mesh(*board_meshes[y*board_size.x+x],
+	// 			glm::mat4(
+	// 				1.0f, 0.0f, 0.0f, 0.0f,
+	// 				0.0f, 1.0f, 0.0f, 0.0f,
+	// 				0.0f, 0.0f, 1.0f, 0.0f,
+	// 				x+0.5f, y+0.5f, 0.0f, 1.0f
+	// 			)
+	// 			* glm::mat4_cast(board_rotations[y*board_size.x+x])
+	// 		);
+	// 	}
+	// }
+	draw_mesh(phone_bank_mesh,
 		glm::mat4(
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
+			0.5f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.5f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			cursor.x+0.5f, cursor.y+0.5f, 0.0f, 1.0f
+			1.0f, 2.0f, -1.5f, 1.0f
 		)
 	);
 
@@ -268,4 +312,17 @@ void GameMode::show_pause_menu() {
 	menu->selected = 1;
 
 	Mode::set_current(menu);
+}
+
+void GameMode::reset_sequence() {
+	sequence_length = 1;
+	interaction_record.clear();
+	light_sequence.clear();
+	add_to_sequence();
+}
+
+void GameMode::add_to_sequence() {
+	std::mt19937 mt(0xbead1234);
+	light_sequence.emplace_back(mt()%num_lights);
+	sequence_length++;
 }

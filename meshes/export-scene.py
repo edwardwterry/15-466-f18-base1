@@ -72,16 +72,16 @@ def write_xfh(obj):
 		world_to_parent.invert()
 	ref = struct.pack('i', len(obj_to_xfh))
 	obj_to_xfh[obj] = ref
-	#print(repr(ref) + ": " + obj.name + " (" + repr(parent_ref) + ")")
+	# print(repr(ref) + ": " + obj.name + " (" + repr(parent_ref) + ")")
 	transform = (world_to_parent * obj.matrix_world).decompose()
-	#print(repr(transform))
+	# print(repr(transform))	
 
 	xfh_data += parent_ref
 	xfh_data += write_string(obj.name)
 	xfh_data += struct.pack('3f', transform[0].x, transform[0].y, transform[0].z)
 	xfh_data += struct.pack('4f', transform[1].x, transform[1].y, transform[1].z, transform[1].w)
 	xfh_data += struct.pack('3f', transform[2].x, transform[2].y, transform[2].z)
-
+	print (xfh_data)
 	return ref
 
 #write_mesh will add an object to the mesh section:

@@ -10,6 +10,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <vector>
+#include <random>
 
 // The 'GameMode' mode is the main gameplay mode:
 
@@ -44,6 +45,18 @@ struct GameMode : public Mode {
 		bool roll_right = false;
 		bool roll_up = false;
 		bool roll_down = false;
+		bool interact = false;
 	} controls;
+	
+	uint32_t sequence_length = 1;
+	const uint32_t num_lights = 4;
+	float interaction_distance = 0.2f; // TODO: tune this
+	std::vector<uint32_t> interaction_record;
+	std::vector<uint32_t> light_sequence;
 
+	// start again after messing up the sequence
+	void reset_sequence();
+
+	// make a new sequence
+	void add_to_sequence();
 };

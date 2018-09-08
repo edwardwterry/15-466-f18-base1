@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <list>
+#include <sstream>
+#include <algorithm>
 
 namespace Sound {
 
@@ -184,10 +186,10 @@ void mix_audio(void *, Uint8 *stream, int len) {
 	}
 
 	//DEBUG: report output power:
-	float max_power = 0.0f;
-	for (uint32_t s = 0; s < MixSamples; ++s) {
-		max_power = std::max(max_power, (buffer[s].l * buffer[s].l + buffer[s].r * buffer[s].r));
-	}
+	// float max_power = 0.0f;
+	// for (uint32_t s = 0; s < MixSamples; ++s) {
+	// 	max_power = std::max(max_power, (buffer[s].l * buffer[s].l + buffer[s].r * buffer[s].r));
+	// }
 	//std::cout << "Max Power: " << std::sqrt(max_power) << std::endl; //DEBUG
 
 };
