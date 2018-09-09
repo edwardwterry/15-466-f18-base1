@@ -23,16 +23,16 @@
 #include <cstddef>
 #include <random>
 
-Load< MeshBuffer > crates_meshes(LoadTagDefault, [](){
-	return new MeshBuffer(data_path("crates.pnc"));
+Load< MeshBuffer > phone_bank_meshes(LoadTagDefault, [](){
+	return new MeshBuffer(data_path("phone-bank.pnc"));
 });
 
 // Load< MeshBuffer > walk_mesh(LoadTagDefault, [](){
 // 	return new MeshBuffer(data_path("walk_mesh.pnc"));
 // });
 
-Load< GLuint > crates_meshes_for_vertex_color_program(LoadTagDefault, [](){
-	return new GLuint(crates_meshes->make_vao_for_program(vertex_color_program->program));
+Load< GLuint > phone_bank_meshes_for_vertex_color_program(LoadTagDefault, [](){
+	return new GLuint(phone_bank_meshes->make_vao_for_program(vertex_color_program->program));
 });
 
 Load< Sound::Sample > sample_dot(LoadTagDefault, [](){
@@ -46,8 +46,9 @@ CratesMode::CratesMode() {
 	//----------------
 	//set up scene:
 	//TODO: this should load the scene from a file!
+
 	{
-		std::string const &filename = data_path("test_box.scene");
+		std::string const &filename = data_path("phone-bank.scene");
 		std::ifstream file(filename, std::ios::binary);
 
 		struct SceneString{
@@ -58,11 +59,9 @@ CratesMode::CratesMode() {
 			uint32_t name_begin, name_end;
 		};
 
-		static_assert(sizeof(IndexEntry) == 2*4, "Index entry should be packed");
+		// static_assert(sizeof(IndexEntry) == 2*4, "Index entry should be packed");
 		std::vector<SceneString> string_data;
-		std::cout<<"here1a"<<std::endl;
 		read_chunk(file, "str0", &string_data);
-		std::cout<<"here1b"<<std::endl;
 
 		struct SceneTransform {
 			uint32_t parent_ref;
@@ -71,20 +70,17 @@ CratesMode::CratesMode() {
 			glm::quat rotation;
 			glm::vec3 scale;
 		};
-		static_assert(sizeof(SceneTransform) == 1*4+2*4+3*4+4*4+3*4, "Index entry should be packed");
+		// static_assert(sizeof(SceneTransform) == 1*4+2*4+3*4+4*4+3*4, "Index entry should be packed");
 		std::vector<SceneTransform> transform_data;
-		std::cout<<"here2a"<<std::endl;
 		read_chunk(file, "xfh0", &transform_data);
-		std::cout<<"here2b"<<std::endl;
+		std::cout<<"num transforms: "<<transform_data.size()<<std::endl;
 
 		struct SceneMesh{
 			uint32_t ref;
 			IndexEntry indices;
 		};
 		std::vector<SceneMesh> mesh_data;
-		std::cout<<"here3a"<<std::endl;
 		read_chunk(file, "msh0", &mesh_data);
-		std::cout<<"here3b"<<std::endl;
 
 		struct SceneCamera{
 			uint32_t ref;
@@ -93,9 +89,7 @@ CratesMode::CratesMode() {
 			float clip_start, clip_end;
 		};
 		std::vector<SceneCamera> camera_data;
-		std::cout<<"here4a"<<std::endl;
 		read_chunk(file, "cam0", &camera_data);
-		std::cout<<"here4b"<<std::endl;
 
 		struct SceneLamp{
 			uint32_t ref;
@@ -105,36 +99,53 @@ CratesMode::CratesMode() {
 			float fov;
 		};
 		std::vector<SceneCamera> lamp_data;
-		std::cout<<"here5a"<<std::endl;
 		read_chunk(file, "lmp0", &lamp_data);
-		std::cout<<"here5b"<<std::endl;
+
+		auto attach_object = [this](Scene::Transform *transform, std::string const &name) {
+			Scene::Object *object = scene.new_object(transform);
+			object->program = vertex_color_program->program;
+			object->program_mvp_mat4 = vertex_color_program->object_to_clip_mat4;
+			object->program_mv_mat4x3 = vertex_color_program->object_to_light_mat4x3;
+			object->program_itmv_mat3 = vertex_color_program->normal_to_light_mat3;
+			object->vao = *phone_bank_meshes_for_vertex_color_program;
+			MeshBuffer::Mesh const &mesh = phone_bank_meshes->lookup(name);
+			object->start = mesh.start;
+			object->count = mesh.count;
+			return object;
+		};
+
+		for (auto const &entry : transform_data){
+			Scene::Transform *transform = scene.new_transform();
+			transform->position = entry.position;
+			transform->rotation = entry.rotation;
+			transform->scale = entry.scale;
+			std::string name(&string_data[0].name + entry.indices.name_begin, &string_data[0].name + entry.indices.name_end);
+			std::cout<<name<<std::endl;
+			// based on https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
+			// find the meshes associated with objects (i.e. without *.nnn)
+			if (name.find(".") != std::string::npos) {
+				uint32_t index = static_cast<uint32_t> (name.find("."));
+				name = name.substr(0, index);
+			}
+			objects.emplace_back(attach_object(transform, name));
+		}
 	}
 
-	auto attach_object = [this](Scene::Transform *transform, std::string const &name) {
-		Scene::Object *object = scene.new_object(transform);
-		object->program = vertex_color_program->program;
-		object->program_mvp_mat4 = vertex_color_program->object_to_clip_mat4;
-		object->program_mv_mat4x3 = vertex_color_program->object_to_light_mat4x3;
-		object->program_itmv_mat3 = vertex_color_program->normal_to_light_mat3;
-		object->vao = *crates_meshes_for_vertex_color_program;
-		MeshBuffer::Mesh const &mesh = crates_meshes->lookup(name);
-		object->start = mesh.start;
-		object->count = mesh.count;
-		return object;
-	};
 
-	{ //build some sort of content:
-		//Crate at the origin:
-		Scene::Transform *transform1 = scene.new_transform();
-		transform1->position = glm::vec3(1.0f, 0.0f, 0.0f);
-		large_crate = attach_object(transform1, "Crate");
-		//smaller crate on top:
-		Scene::Transform *transform2 = scene.new_transform();
-		transform2->set_parent(transform1);
-		transform2->position = glm::vec3(0.0f, 0.0f, 1.5f);
-		transform2->scale = glm::vec3(0.5f);
-		small_crate = attach_object(transform2, "Crate");
-	}
+
+
+	// { //build some sort of content:
+	// 	//Crate at the origin:
+	// 	Scene::Transform *transform1 = scene.new_transform();
+	// 	transform1->position = glm::vec3(1.0f, 0.0f, 0.0f);
+	// 	large_crate = attach_object(transform1, "Crate");
+	// 	//smaller crate on top:
+	// 	Scene::Transform *transform2 = scene.new_transform();
+	// 	transform2->set_parent(transform1);
+	// 	transform2->position = glm::vec3(0.0f, 0.0f, 1.5f);
+	// 	transform2->scale = glm::vec3(0.5f);
+	// 	small_crate = attach_object(transform2, "Crate");
+	// }
 
 	{ //Camera looking at the origin:
 		Scene::Transform *transform = scene.new_transform();
