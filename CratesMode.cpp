@@ -27,9 +27,9 @@ Load< MeshBuffer > crates_meshes(LoadTagDefault, [](){
 	return new MeshBuffer(data_path("crates.pnc"));
 });
 
-Load< MeshBuffer > walk_mesh(LoadTagDefault, [](){
-	return new MeshBuffer(data_path("walk_mesh.pnc"));
-});
+// Load< MeshBuffer > walk_mesh(LoadTagDefault, [](){
+// 	return new MeshBuffer(data_path("walk_mesh.pnc"));
+// });
 
 Load< GLuint > crates_meshes_for_vertex_color_program(LoadTagDefault, [](){
 	return new GLuint(crates_meshes->make_vao_for_program(vertex_color_program->program));
@@ -47,19 +47,67 @@ CratesMode::CratesMode() {
 	//set up scene:
 	//TODO: this should load the scene from a file!
 	{
-		struct Transform {
-			uint32_t parent_ref;
+		std::string const &filename = data_path("test_box.scene");
+		std::ifstream file(filename, std::ios::binary);
+
+		struct SceneString{
+			char name;
+		};
+
+		struct IndexEntry {
 			uint32_t name_begin, name_end;
+		};
+
+		static_assert(sizeof(IndexEntry) == 2*4, "Index entry should be packed");
+		std::vector<SceneString> string_data;
+		std::cout<<"here1a"<<std::endl;
+		read_chunk(file, "str0", &string_data);
+		std::cout<<"here1b"<<std::endl;
+
+		struct SceneTransform {
+			uint32_t parent_ref;
+			IndexEntry indices;
 			glm::vec3 position;
 			glm::quat rotation;
 			glm::vec3 scale;
 		};
-		static_assert(sizeof(Transform) == 1*4+2*4+3*4+4*4+3*4, "Index entry should be packed");
-		std::string const &filename = data_path("test_box.scene");
-		std::ifstream file(filename, std::ios::binary);
-		std::vector<Transform> data;
-		read_chunk(file, "xfh0", &data);
-		std::cout<<glm::to_string(data[0].position)<<std::endl;
+		static_assert(sizeof(SceneTransform) == 1*4+2*4+3*4+4*4+3*4, "Index entry should be packed");
+		std::vector<SceneTransform> transform_data;
+		std::cout<<"here2a"<<std::endl;
+		read_chunk(file, "xfh0", &transform_data);
+		std::cout<<"here2b"<<std::endl;
+
+		struct SceneMesh{
+			uint32_t ref;
+			IndexEntry indices;
+		};
+		std::vector<SceneMesh> mesh_data;
+		std::cout<<"here3a"<<std::endl;
+		read_chunk(file, "msh0", &mesh_data);
+		std::cout<<"here3b"<<std::endl;
+
+		struct SceneCamera{
+			uint32_t ref;
+			char view_type;
+			float fov;
+			float clip_start, clip_end;
+		};
+		std::vector<SceneCamera> camera_data;
+		std::cout<<"here4a"<<std::endl;
+		read_chunk(file, "cam0", &camera_data);
+		std::cout<<"here4b"<<std::endl;
+
+		struct SceneLamp{
+			uint32_t ref;
+			char type;
+			unsigned char r, g, b;
+			float energy, distance;
+			float fov;
+		};
+		std::vector<SceneCamera> lamp_data;
+		std::cout<<"here5a"<<std::endl;
+		read_chunk(file, "lmp0", &lamp_data);
+		std::cout<<"here5b"<<std::endl;
 	}
 
 	auto attach_object = [this](Scene::Transform *transform, std::string const &name) {

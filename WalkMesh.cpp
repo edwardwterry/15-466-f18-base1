@@ -53,18 +53,21 @@ glm::vec3 WalkMesh::computeBaryCoords(glm::uvec3 const &triangle, glm::vec3 cons
 
 void WalkMesh::walk(WalkPoint &wp, glm::vec3 const &step) const {
 	//TODO: project step to barycentric coordinates to get weights_step
-	glm::vec3 weights_step;
+	glm::vec3 weights_step = computeBaryCoords(wp.triangle, world_point + step);
 
 	//TODO: when does wp.weights + t * weights_step cross a triangle edge?
-	float t = 1.0f;
+	float t = weights_step.x + weights_step.y + weights_step.z;
+	// if crosses an edge, at least one will be negative
 
 	if (t >= 1.0f) { //if a triangle edge is not crossed
 		//TODO: wp.weights gets moved by weights_step, nothing else needs to be done.
-
+		wp.weights += weights_step;
 	} else { //if a triangle edge is crossed
 		//TODO: wp.weights gets moved to triangle edge, and step gets reduced
+		wp.weights = glm::normalize(wp.weights);
 		//if there is another triangle over the edge:
 			//TODO: wp.triangle gets updated to adjacent triangle
+			
 			//TODO: step gets rotated over the edge
 		//else if there is no other triangle over the edge:
 			//TODO: wp.triangle stays the same.
