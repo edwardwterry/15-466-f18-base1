@@ -106,6 +106,25 @@ MeshBuffer::MeshBuffer(std::string const &filename) {
 		Color = Attrib(4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), offsetof(Vertex, Color));
 		TexCoord = Attrib(2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, TexCoord));
 
+	} else if (filename.size() >= 4 && filename.substr(filename.size()-4) == ".walk"){
+		struct Vertex {
+			uint32_t Index;
+			glm::vec3 Position;
+			glm::vec3 Normal;
+		};
+		static_assert(sizeof(Vertex) == 1*4+3*4+3*4, "Vertex is packed.");
+
+		std::vector< Vertex > vertices;
+		read_chunk(file, "walk", &vertices);
+
+		struct Polygon {
+			uint32_t Index;
+			glm::uvec3 Vertices;
+		};
+
+		std::vector< Polygon > polygons;
+		read_chunk(file, "walk", &polygons);
+
 	} else {
 		throw std::runtime_error("Unknown file type '" + filename + "'");
 	}

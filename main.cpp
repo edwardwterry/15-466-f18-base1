@@ -145,6 +145,7 @@ int main(int argc, char **argv) {
 					break;
 				}
 			}
+			// std::cout<<"e"<<std::endl;
 			if (!Mode::current) break;
 		}
 
@@ -157,8 +158,9 @@ int main(int argc, char **argv) {
 			//if frames are taking a very long time to process,
 			//lag to avoid spiral of death:
 			elapsed = std::min(0.1f, elapsed);
-
+			// std::cout<<"u"<<std::endl;
 			Mode::current->update(elapsed);
+			// std::cout<<"u2"<<std::endl;
 			if (!Mode::current) break;
 		}
 
@@ -169,8 +171,9 @@ int main(int argc, char **argv) {
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+			// std::cout<<"d"<<std::endl;
 			Mode::current->draw(drawable_size);
+			// std::cout<<"d2"<<std::endl;
 		}
 
 		//Finally, wait until the recently-drawn frame is shown before doing it all again:

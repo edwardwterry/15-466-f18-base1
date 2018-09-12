@@ -28,7 +28,7 @@ struct MeshBuffer {
 	Attrib Color;
 	Attrib TexCoord;
 
-
+	
 	//construct from a file:
 	// note: will throw if file fails to read.
 	MeshBuffer(std::string const &filename);

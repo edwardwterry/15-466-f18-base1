@@ -29,7 +29,7 @@
 MeshBuffer::Mesh phone_bank_mesh;
 
 Load< MeshBuffer > meshes(LoadTagDefault, [](){
-	MeshBuffer const *ret = new MeshBuffer(data_path("phone-bank.pnc"));
+	MeshBuffer const *ret = new MeshBuffer(data_path("test_box.pnc"));
 
 	// tile_mesh = ret->lookup("Tile");
 	// cursor_mesh = ret->lookup("Cursor");
@@ -37,7 +37,7 @@ Load< MeshBuffer > meshes(LoadTagDefault, [](){
 	// egg_mesh = ret->lookup("Egg");
 	// cube_mesh = ret->lookup("Cube");
 
-	phone_bank_mesh = ret->lookup("Plane");
+	phone_bank_mesh = ret->lookup("Cube");
 
 	return ret;
 });

@@ -24,11 +24,11 @@
 #include <random>
 
 Load< MeshBuffer > phone_bank_meshes(LoadTagDefault, [](){
-	return new MeshBuffer(data_path("phone-bank.pnc"));
+	return new MeshBuffer(data_path("test_box.pnc"));
 });
 
 // Load< MeshBuffer > walk_mesh(LoadTagDefault, [](){
-// 	return new MeshBuffer(data_path("walk_mesh.pnc"));
+// 	return new MeshBuffer(data_path("phone-bank.walk"));
 // });
 
 Load< GLuint > phone_bank_meshes_for_vertex_color_program(LoadTagDefault, [](){
@@ -48,7 +48,7 @@ CratesMode::CratesMode() {
 	//TODO: this should load the scene from a file!
 
 	{
-		std::string const &filename = data_path("phone-bank.scene");
+		std::string const &filename = data_path("test_box.scene");
 		std::ifstream file(filename, std::ios::binary);
 
 		struct SceneString{
@@ -108,7 +108,9 @@ CratesMode::CratesMode() {
 			object->program_mv_mat4x3 = vertex_color_program->object_to_light_mat4x3;
 			object->program_itmv_mat3 = vertex_color_program->normal_to_light_mat3;
 			object->vao = *phone_bank_meshes_for_vertex_color_program;
+			// std::cout<<"here2"<<std::endl;
 			MeshBuffer::Mesh const &mesh = phone_bank_meshes->lookup(name);
+			// std::cout<<"here3"<<std::endl;
 			object->start = mesh.start;
 			object->count = mesh.count;
 			return object;
@@ -127,6 +129,7 @@ CratesMode::CratesMode() {
 				uint32_t index = static_cast<uint32_t> (name.find("."));
 				name = name.substr(0, index);
 			}
+			// std::cout<<"here1"<<std::endl;
 			objects.emplace_back(attach_object(transform, name));
 		}
 	}
@@ -146,17 +149,20 @@ CratesMode::CratesMode() {
 	// 	transform2->scale = glm::vec3(0.5f);
 	// 	small_crate = attach_object(transform2, "Crate");
 	// }
-
+	// std::cout<<"here4"<<std::endl;
 	{ //Camera looking at the origin:
 		Scene::Transform *transform = scene.new_transform();
-		transform->position = glm::vec3(0.0f, -10.0f, 1.0f);
+		transform->position = glm::vec3(0.0f, 0.0f, 1.0f);
 		//Cameras look along -z, so rotate view to look at origin:
 		transform->rotation = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		camera = scene.new_camera(transform);
 	}
-	
 	//start the 'loop' sample playing at the large crate:
-	loop = sample_loop->play(large_crate->transform->position, 1.0f, Sound::Loop);
+	loop = sample_loop->play(objects[0]->transform->position, 1.0f, Sound::Loop);
+	std::cout<<"here5"<<std::endl;
+
+	walk_point = walk_mesh.start(glm::vec3(0.25f, 0.0f, 0.0f));
+	std::cout<<"here6"<<std::endl;
 }
 
 CratesMode::~CratesMode() {
@@ -233,17 +239,42 @@ void CratesMode::update(float elapsed) {
 		Sound::listener.set_right( glm::normalize(cam_to_world[0]) );
 
 		if (loop) {
-			glm::mat4 large_crate_to_world = large_crate->transform->make_local_to_world();
+			glm::mat4 large_crate_to_world = objects[0]->transform->make_local_to_world();
 			loop->set_position( large_crate_to_world * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) );
 		}
 	}
 
-	dot_countdown -= elapsed;
-	if (dot_countdown <= 0.0f) {
-		dot_countdown = (rand() / float(RAND_MAX) * 2.0f) + 0.5f;
-		glm::mat4x3 small_crate_to_world = small_crate->transform->make_local_to_world();
-		sample_dot->play( small_crate_to_world * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) );
-	}
+	// dot_countdown -= elapsed;
+	// if (dot_countdown <= 0.0f) {
+	// 	dot_countdown = (rand() / float(RAND_MAX) * 2.0f) + 0.5f;
+	// 	glm::mat4x3 small_crate_to_world = small_crate->transform->make_local_to_world();
+	// 	sample_dot->play( small_crate_to_world * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) );
+	// }
+
+	glm::vec3 player_at;
+	glm::vec3 player_up{0.0f, 0.0f, 0.0f};
+	glm::vec3 player_forward;
+	glm::vec3 player_right;
+
+		//update position on walk mesh:
+	glm::vec3 step = player_forward * amt;
+	walk_mesh.walk(walk_point, step);
+
+	//update player position:
+	player_at = walk_mesh.world_point(walk_point);
+
+	//update player orientation:
+	glm::vec3 old_player_up = player_up;
+	player_up = walk_mesh.world_normal(walk_point);
+
+	glm::quat orientation_change;// = (compute rotation that takes old_player_up to player_up)
+	player_forward = orientation_change * player_forward;
+
+	//make sure player_forward is perpendicular to player_up (the earlier rotation should ensure that, but it might drift over time):
+	player_forward = glm::normalize(player_forward - player_up * glm::dot(player_up, player_forward));
+
+	//compute rightward direction from forward and up:
+	player_right = glm::cross(player_forward, player_up);
 }
 
 void CratesMode::draw(glm::uvec2 const &drawable_size) {
