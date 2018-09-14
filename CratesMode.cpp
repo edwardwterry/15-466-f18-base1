@@ -47,7 +47,6 @@ Load< WalkMesh > walk_mesh(LoadTagDefault, [](){ // thanks, Jim!
 		uint32_t Index;
 		glm::vec3 Position;
 	};
-	// static_assert(sizeof(Vertex) == 1*4+3*4, "Vertex is packed.");
 
 	std::vector< Vertex > vertex_data;
 	read_chunk(file, "vtx0", &vertex_data);
@@ -68,11 +67,8 @@ Load< WalkMesh > walk_mesh(LoadTagDefault, [](){ // thanks, Jim!
 	for(auto t : triangle_data){
 		triangles.emplace_back(t.Vertices);
 	}
-
-    // read_chunk(file, "walk", &vertices);
-//     read_chunk(file, "walk", &triangles);
     return new WalkMesh(vertices, triangles);
-}); // error C2440: 'return': cannot convert from 'WalkMesh *' to 'Load<WalkMesh>'
+});
 
 
 Load< GLuint > phone_bank_meshes_for_vertex_color_program(LoadTagDefault, [](){
@@ -198,7 +194,7 @@ CratesMode::CratesMode() {
 	{ // Player transform
 		player = scene.new_transform();
 		// std::cout<<"here1"<<std::endl;
-		player->position = glm::vec3(0.75f, 0.0f, 0.0f);
+		player->position = glm::vec3(0.0f, 0.0f, 0.0f);
 		// std::cout<<"here2"<<std::endl;
 		// player->rotation = glm::quat_cast(glm::inverse(glm::mat3(
 		// 	glm::vec3(0.0f, 1.0f, 0.0f),
@@ -211,7 +207,7 @@ CratesMode::CratesMode() {
 
 	{ //Camera looking at the origin:
 		Scene::Transform *transform = scene.new_transform();
-		transform->position = glm::vec3(0.0f, 0.0f, 0.0f);
+		transform->position = glm::vec3(0.0f, 0.0f, 1.0f);
 		//Cameras look along -z, so rotate view to look at origin:
 		transform->rotation = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		camera = scene.new_camera(transform);
