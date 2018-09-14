@@ -27,9 +27,8 @@
 // MeshBuffer::Mesh cube_mesh;
 
 MeshBuffer::Mesh phone_bank_mesh;
-
 Load< MeshBuffer > meshes(LoadTagDefault, [](){
-	MeshBuffer const *ret = new MeshBuffer(data_path("test_box.pnc"));
+	MeshBuffer const *ret = new MeshBuffer(data_path("monkey.pnc"));
 
 	// tile_mesh = ret->lookup("Tile");
 	// cursor_mesh = ret->lookup("Cursor");
@@ -37,10 +36,25 @@ Load< MeshBuffer > meshes(LoadTagDefault, [](){
 	// egg_mesh = ret->lookup("Egg");
 	// cube_mesh = ret->lookup("Cube");
 
-	phone_bank_mesh = ret->lookup("Cube");
+	// phone_bank_mesh = ret->lookup("Cube");
+	phone_bank_mesh = ret->lookup("Monkey");
 
 	return ret;
 });
+
+// std::vector< glm::vec3 > vertices;
+// std::vector< glm::uvec3 > triangles;
+
+
+// Load< WalkMesh > walk_mesh(LoadTagDefault, [](){ // thanks, Jim!
+//     std::ifstream file(data_path("phone-bank-training.walk"), std::ios::binary);
+//     read_chunk(file, "walk", &vertices);
+//     read_chunk(file, "walk", &triangles);
+// // 	WalkMesh const *ret = new WalkMesh(vertices, triangles);
+//     return new WalkMesh(vertices, triangles);
+// // // MeshBuffer const *ret = new MeshBuffer(data_path("monkey.pnc"));
+// // 	return ret;
+// });
 
 Load< GLuint > meshes_for_vertex_color_program(LoadTagDefault, [](){
 	return new GLuint(meshes->make_vao_for_program(vertex_color_program->program));

@@ -7,12 +7,16 @@
 #include "GL.hpp"
 #include "Scene.hpp"
 #include "Sound.hpp"
+#include "Load.hpp"
+#include "data_path.hpp"
+#include "read_chunk.hpp" //helper for reading a vector of structures from a file
 
 #include <SDL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include <vector>
+#include <fstream>
 
 // The 'CratesMode' shows scene with some crates in it:
 
@@ -44,6 +48,9 @@ struct CratesMode : public Mode {
 	bool mouse_captured = false;
 
 	Scene scene;
+
+	Scene::Transform *player = nullptr;
+
 	Scene::Camera *camera = nullptr;
 
 	Scene::Object *large_crate = nullptr;
@@ -74,4 +81,10 @@ struct CratesMode : public Mode {
 
 	WalkMesh walk_mesh{vertices, triangles};
 	WalkMesh::WalkPoint walk_point;
+
+	// glm::vec3 player_at;
+	// glm::vec3 *player_at = &player->position;
+	// glm::vec3 player_up{0.0f, 0.0f, 1.0f};
+	// glm::vec3 player_forward{1.0f, 0.0f, 0.0f};
+	// glm::vec3 player_right{0.0f, -1.0f, 1.0f};
 };

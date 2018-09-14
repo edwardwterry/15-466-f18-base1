@@ -8,6 +8,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp> //allows the use of 'uvec2' as an unordered_map key
 #include <glm/gtx/string_cast.hpp> //https://stackoverflow.com/questions/11515469/how-do-i-print-vector-values-of-type-glmvec3-that-have-been-passed-by-referenc
+#include "read_chunk.hpp" //helper for reading a vector of structures from a file
 
 struct WalkMesh {
 	//Walk mesh will keep track of triangles, vertices:
@@ -23,6 +24,7 @@ struct WalkMesh {
 
 	//Construct new WalkMesh and build next_vertex structure:
 	WalkMesh(std::vector< glm::vec3 > const &vertices_, std::vector< glm::uvec3 > const &triangles_);
+	// WalkMesh(std::string const &filename);
 
 	struct WalkPoint {
 		glm::uvec3 triangle = glm::uvec3(-1U); //indices of current triangle
@@ -51,7 +53,7 @@ struct WalkMesh {
 		));
 	}
 
-	uint32_t getCrossedEdge(glm::vec3 const &pt) const;
+	int32_t getCrossedEdge(glm::vec3 const &pt) const;
 	glm::uvec3 getClosestTri(glm::vec3 const &world_point) const;
 	glm::vec3 computeBaryCoords(glm::uvec3 const &triangle, glm::vec3 const &world_point) const;
 
