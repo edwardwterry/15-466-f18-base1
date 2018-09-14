@@ -27,15 +27,52 @@ Load< MeshBuffer > phone_bank_meshes(LoadTagDefault, [](){
 	return new MeshBuffer(data_path("phone-bank-training.pnc"));
 });
 
-// std::vector< glm::vec3 > vertices;
-// std::vector< glm::uvec3 > triangles;
+std::vector< glm::vec3 > vertices;
+std::vector< glm::uvec3 > triangles;
 
-// Load< WalkMesh > walk_mesh(LoadTagDefault, [](){ // thanks, Jim!
-//     std::ifstream file(data_path("phone-bank-training.walk"), std::ios::binary);
-//     read_chunk(file, "walk", &vertices);
+// std::vector< glm::vec3 > vertices{
+// 	glm::vec3(0.0f, 0.0f, 0.0f), 
+// 	glm::vec3(0.5f, -0.5f, 0.0f), 
+// 	glm::vec3(0.5f, 0.5f, 0.0f), 
+// 	glm::vec3(1.0f, 0.0f, 0.0f)};
+
+// std::vector< glm::uvec3 > triangles{
+// 	glm::uvec3(0, 1, 2), 
+// 	glm::uvec3(3, 2, 1)};
+
+Load< WalkMesh > walk_mesh(LoadTagDefault, [](){ // thanks, Jim!
+    std::ifstream file(data_path("phone-bank-training.walk"), std::ios::binary);
+
+	struct Vertex {
+		uint32_t Index;
+		glm::vec3 Position;
+	};
+	// static_assert(sizeof(Vertex) == 1*4+3*4, "Vertex is packed.");
+
+	std::vector< Vertex > vertex_data;
+	read_chunk(file, "vtx0", &vertex_data);
+
+	for(auto v : vertex_data){
+		vertices.emplace_back(v.Position);
+		std::cout<<glm::to_string(v.Position)<<std::endl;
+	}
+
+	struct Triangle {
+		uint32_t Index;
+		glm::uvec3 Vertices;
+	};
+
+	std::vector< Triangle > triangle_data;
+	read_chunk(file, "tri0", &triangle_data);
+
+	for(auto t : triangle_data){
+		triangles.emplace_back(t.Vertices);
+	}
+
+    // read_chunk(file, "walk", &vertices);
 //     read_chunk(file, "walk", &triangles);
-//     return new WalkMesh(vertices, triangles);
-// }); // error C2440: 'return': cannot convert from 'WalkMesh *' to 'Load<WalkMesh>'
+    return new WalkMesh(vertices, triangles);
+}); // error C2440: 'return': cannot convert from 'WalkMesh *' to 'Load<WalkMesh>'
 
 
 Load< GLuint > phone_bank_meshes_for_vertex_color_program(LoadTagDefault, [](){
@@ -187,7 +224,7 @@ CratesMode::CratesMode() {
 	// std::cout<<"here5"<<std::endl;
 	// std::cout<<"start pos2: "<<&player<<std::endl;
 
-	walk_point = walk_mesh.start(player->position);
+	walk_point = walk_mesh->start(player->position);
 	// std::cout<<"walk_point at init: "<<glm::to_string(walk_point)<<std::endl;
 }
 
@@ -342,8 +379,8 @@ void CratesMode::update(float elapsed) {
 	if (controls.backward) {
 		step -= directions[2] * amt;
 	}
-	walk_mesh.walk(walk_point, step);
-	player->position = walk_mesh.world_point(walk_point);
+	walk_mesh->walk(walk_point, step);
+	player->position = walk_mesh->world_point(walk_point);
 	// std::cout<<"step :"<<glm::to_string(step)<<std::endl;
 	// std::cout<<"player_pos: "<<glm::to_string(walk_mesh.world_point(walk_point))<<std::endl;
 	// std::cout<<"on tri: "<<glm::to_string(walk_point.triangle)<<std::endl;
