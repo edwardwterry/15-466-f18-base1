@@ -63,23 +63,6 @@ struct CratesMode : public Mode {
 	//this 'loop' sample is played at the large crate:
 	std::shared_ptr< Sound::PlayingSample > loop;
 
-	// std::vector< glm::vec3 > vertices;
-	// std::vector< glm::vec3 > vertices{
-	// 	glm::vec3(0.0f, 0.0f, 0.0f), 
-	// 	glm::vec3(0.5f, -0.5f, 0.0f), 
-	// 	glm::vec3(0.5f, 0.5f, 0.0f), 
-	// 	glm::vec3(1.0f, 0.0f, 0.0f)};
-	// vertices.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f));
-	// vertices.emplace(0.0f, -0.5f, 0.0f);
-	// vertices.emplace(0.5f, 0.5f, 0.0f);
-	// vertices.emplace(1.0f, 0.0f, 0.0f);
-
- 	// std::vector< glm::uvec3 > triangles;
- 	// std::vector< glm::uvec3 > triangles{
- 	// 	glm::uvec3(0, 1, 2), 
- 	// 	glm::uvec3(3, 2, 1)};
-
-	// WalkMesh walk_mesh{vertices, triangles};
 	WalkMesh::WalkPoint walk_point;
 
 	// glm::vec3 player_at;

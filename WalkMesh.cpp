@@ -102,13 +102,15 @@ void WalkMesh::walk(WalkPoint &wp, glm::vec3 const &step) const {
 		glm::vec3 walk_result = world_point(wp) + t * step; // recalculate (x,y,z) of expected step
 		weights_step = computeBaryCoords(wp.triangle, walk_result); // bary if this step is taken
 	}
-	// std::cout<<"t: "<<t<<std::endl;
+	std::cout<<"t: "<<t<<std::endl;
+	std::cout<<"weights_step: "<<glm::to_string(weights_step)<<std::endl;
 	// glm::vec3 weights_update = wp.weights + t * weights_step; // use the one which will keep you inside triangle
 	if (t >= 1.0f) { 
 	// 	//TODO: wp.weights gets moved by weights_step, nothing else needs to be done.
 		wp.weights = weights_step;
 	} else { //if a triangle edge is crossed
 	// 	//TODO: wp.weights gets moved to triangle edge, and step gets reduced
+		wp.weights = weights_step;
 		bool at_boundary = false;
 	// 	// based on: http://www.cplusplus.com/reference/unordered_map/unordered_map/find/
 		std::unordered_map<glm::uvec2, uint32_t>::const_iterator v;
@@ -146,21 +148,22 @@ void WalkMesh::walk(WalkPoint &wp, glm::vec3 const &step) const {
 		next_tri_vertices_glm.z = next_tri_vertices[2];
 		std::cout<<"next_tri_vertices_glm: "<<glm::to_string(next_tri_vertices_glm)<<std::endl;
 
-
 		if (at_boundary){ // if there is no other triangle over the edge
 		
 		} else {
 			// thanks to https://stackoverflow.com/questions/22388204/get-index-of-the-matching-item-from-vector-c
-			// uint32_t index = 0;
+			uint32_t index = 0;
 			while(std::find(std::begin(triangles), std::end(triangles), next_tri_vertices_glm) != std::end(triangles)){
 				std::rotate(std::begin(next_tri_vertices), std::begin(next_tri_vertices) + 1, std::end(next_tri_vertices));
 				next_tri_vertices_glm.x = next_tri_vertices[0];
 				next_tri_vertices_glm.y = next_tri_vertices[1];
 				next_tri_vertices_glm.z = next_tri_vertices[2];
+				std::cout<<"index"<<index<<std::endl;
+				index++;
 			}
-			auto next_tri_index = std::find(std::begin(triangles), std::end(triangles), next_tri_vertices_glm);
+			// auto next_tri_index = std::find(std::begin(triangles), std::end(triangles), next_tri_vertices_glm);
 			glm::vec3 walk_result = world_point(wp) + (1 - t) * step; // recalculate (x,y,z) of expected step
-			std::cout<<"walk_result: "<<glm::to_string(walk_result)<<std::endl;
+			std::cout<<"walk_result (x,y,z): "<<glm::to_string(walk_result)<<std::endl;
 			// std::cout<<"std::begin(triangles): "<<&std::begin(triangles)<<std::endl;
 			// std::cout<<"next_tri_index: "<<&next_tri_index<<std::endl;
 			// std::cout<<"dist: "<<std::distance(std::begin(triangles), next_tri_index)<<std::endl;

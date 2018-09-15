@@ -363,7 +363,7 @@ bool CratesMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 void CratesMode::update(float elapsed) {
 	glm::mat3 directions = glm::mat3_cast(camera->transform->rotation);
 	// std::cout<<"Directions: "<<glm::to_string(directions)<<std::endl;	
-	float amt = 1.0f * elapsed;
+	float amt = 3.0f * elapsed;
 	glm::vec3 step = glm::vec3(0.0f, 0.0f, 0.0f);
 	// if (controls.right) player->position -= amt * directions[0];
 	// if (controls.left) player->position += amt * directions[0];
