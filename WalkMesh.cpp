@@ -2,33 +2,22 @@
 
 WalkMesh::WalkMesh(std::vector< glm::vec3 > const &vertices_, std::vector< glm::uvec3 > const &triangles_)
 	: vertices(vertices_), triangles(triangles_) {
-// WalkMesh::WalkMesh(std::string const &filename){
-//     std::ifstream file(filename, std::ios::binary);
-//     read_chunk(file, "walk", &vertices);
-//     read_chunk(file, "walk", &triangles);
-	//TODO: construct next_vertex map
-	// for (glm::uvec3 tri : triangles_){
 	for (glm::uvec3 tri : triangles){
 		std::vector<uint32_t> v = {tri.x, tri.y, tri.z};
 		next_vertex.emplace(glm::uvec2(v[0], v[1]), v[2]);
 		next_vertex.emplace(glm::uvec2(v[1], v[2]), v[0]);
 		next_vertex.emplace(glm::uvec2(v[2], v[0]), v[1]);
-		triangles_std = v;
-		// std::cout<<v[0]<<" "<<v[1]<<" "<<v[2]<<std::endl;
 	}
-	// for (glm::vec3 v : vertices_){
-	// 	std::cout<<v[0]<<" "<<v[1]<<" "<<v[2]<<std::endl;
-	// }
 }
 
 WalkMesh::WalkPoint WalkMesh::start(glm::vec3 const &world_point) const {
 	WalkPoint closest;
 	//TODO: if point is closest, closest.triangle gets the current triangle, closest.weights gets the barycentric coordinates
-	std::cout<<"world_point: "<<glm::to_string(world_point)<<std::endl;
+	// std::cout<<"world_point: "<<glm::to_string(world_point)<<std::endl;
 	closest.triangle = getClosestTri(world_point);
-	std::cout<<"closest tri: "<<glm::to_string(closest.triangle)<<std::endl;
+	// std::cout<<"closest tri: "<<glm::to_string(closest.triangle)<<std::endl;
 	closest.weights = computeBaryCoords(closest.triangle, world_point);
-	std::cout<<"bary coords"<<glm::to_string(closest.weights)<<std::endl;
+	// std::cout<<"bary coords"<<glm::to_string(closest.weights)<<std::endl;
 	return closest;
 }
 
@@ -64,7 +53,7 @@ glm::uvec3 WalkMesh::getClosestTri(glm::vec3 const &world_point) const{
 		std::vector<uint32_t> vs = {triangles[i].x, triangles[i].y, triangles[i].z};
 		for (uint32_t v : vs){
 			distance = glm::distance(world_point, vertices[v]);
-			std::cout<<"distance: "<<distance<<std::endl;
+			// std::cout<<"distance: "<<distance<<std::endl;
 			if (i == 0){
 				min_distance = distance;
 				min_triangle = i;
@@ -102,8 +91,8 @@ void WalkMesh::walk(WalkPoint &wp, glm::vec3 const &step) const {
 		glm::vec3 walk_result = world_point(wp) + t * step; // recalculate (x,y,z) of expected step
 		weights_step = computeBaryCoords(wp.triangle, walk_result); // bary if this step is taken
 	}
-	std::cout<<"t: "<<t<<std::endl;
-	std::cout<<"weights_step: "<<glm::to_string(weights_step)<<std::endl;
+	// std::cout<<"t: "<<t<<std::endl;
+	// std::cout<<"weights_step: "<<glm::to_string(weights_step)<<std::endl;
 	// glm::vec3 weights_update = wp.weights + t * weights_step; // use the one which will keep you inside triangle
 	if (t >= 1.0f) { 
 	// 	//TODO: wp.weights gets moved by weights_step, nothing else needs to be done.
@@ -146,60 +135,57 @@ void WalkMesh::walk(WalkPoint &wp, glm::vec3 const &step) const {
 		next_tri_vertices_glm.x = next_tri_vertices[0];
 		next_tri_vertices_glm.y = next_tri_vertices[1];
 		next_tri_vertices_glm.z = next_tri_vertices[2];
-		std::cout<<"next_tri_vertices_glm: "<<glm::to_string(next_tri_vertices_glm)<<std::endl;
+		// std::cout<<"next_tri_vertices_glm: "<<glm::to_string(next_tri_vertices_glm)<<std::endl;
 
 		if (at_boundary){ // if there is no other triangle over the edge
-		
+			// glm::vec3 crossed_edge_vector;
+			// // glm::vec3 slid_point;
+			// switch (crossed_edge){
+			// 	case 0:
+			// 		crossed_edge_vector = glm::vec3(vertices[wp.triangle.z] - vertices[wp.triangle.y]);
+			// 		break;
+			// 	case 1:
+			// 		crossed_edge_vector = glm::vec3(vertices[wp.triangle.x] - vertices[wp.triangle.z]);
+			// 		break;
+			// 	case 2:
+			// 		crossed_edge_vector = glm::vec3(vertices[wp.triangle.y] - vertices[wp.triangle.x]);
+			// 		break;
+			// 	default:
+			// 		break;
+			// }			
+			// glm::vec3 walk_result = world_point(wp) + (1 - t) * glm::dot(step, crossed_edge_vector); // recalculate (x,y,z) of expected step
+
+			// // std::cout<<"crossed_edge_vector: "<<glm::to_string(crossed_edge_vector)<<std::endl;
+			// // //TODO: step gets updated to slide along the edge
+			// // slid_point = glm::dot(weights_step, crossed_edge_vector) * glm::normalize(weights_step); // projection onto edge in world coords
+			// // std::cout<<"slid_point: "<<glm::to_string(slid_point)<<std::endl;
+			// //TODO: wp.triangle stays the same.
+			// weights_step = computeBaryCoords(wp.triangle, walk_result);
+			// wp.weights = weights_step;
 		} else {
+			// std::cout<<"here"<<std::endl;
 			// thanks to https://stackoverflow.com/questions/22388204/get-index-of-the-matching-item-from-vector-c
-			uint32_t index = 0;
 			while(std::find(std::begin(triangles), std::end(triangles), next_tri_vertices_glm) != std::end(triangles)){
 				std::rotate(std::begin(next_tri_vertices), std::begin(next_tri_vertices) + 1, std::end(next_tri_vertices));
 				next_tri_vertices_glm.x = next_tri_vertices[0];
 				next_tri_vertices_glm.y = next_tri_vertices[1];
 				next_tri_vertices_glm.z = next_tri_vertices[2];
-				std::cout<<"index"<<index<<std::endl;
-				index++;
+				// std::cout<<"loop!"<<std::endl;
 			}
 			// auto next_tri_index = std::find(std::begin(triangles), std::end(triangles), next_tri_vertices_glm);
 			glm::vec3 walk_result = world_point(wp) + (1 - t) * step; // recalculate (x,y,z) of expected step
-			std::cout<<"walk_result (x,y,z): "<<glm::to_string(walk_result)<<std::endl;
+			// std::cout<<"here"<<std::endl;
+			// std::cout<<"walk_result (x,y,z): "<<glm::to_string(walk_result)<<std::endl;
 			// std::cout<<"std::begin(triangles): "<<&std::begin(triangles)<<std::endl;
 			// std::cout<<"next_tri_index: "<<&next_tri_index<<std::endl;
 			// std::cout<<"dist: "<<std::distance(std::begin(triangles), next_tri_index)<<std::endl;
+			//TODO: wp.triangle gets updated to adjacent triangle
 			wp.triangle = next_tri_vertices_glm; // triangles[std::distance(std::begin(triangles), next_tri_index)];
+			//TODO: step gets rotated over the edge
 			weights_step = computeBaryCoords(wp.triangle, walk_result); // bary if this step is taken, will automatically project to surface
+			// std::cout<<"here"<<std::endl;
 			wp.weights = weights_step;
-			std::cout<<"triangle: "<<glm::to_string(wp.triangle)<<std::endl;
+			// std::cout<<"world pt: "<<glm::to_string(world_point(wp))<<std::endl;
 		}
-
-
-
-	// 		// vector of crossed edgeC:\Users\Edward\OneDrive\Documents\03.MRSD_Sem3\01.15-666\15-466-f18-base1
-	// 		glm::vec3 crossed_edge_vector;
-	// 		glm::vec3 slid_point;
-	// 		switch (crossed_edge){
-	// 			case 0:
-	// 				crossed_edge_vector = glm::vec3(vertices[wp.triangle.z].z - vertices[wp.triangle.y].y);
-	// 				break;
-	// 			case 1:
-	// 				crossed_edge_vector = glm::vec3(vertices[wp.triangle.x].x - vertices[wp.triangle.z].z);
-	// 				break;
-	// 			case 2:
-	// 				crossed_edge_vector = glm::vec3(vertices[wp.triangle.y].y - vertices[wp.triangle.x].x);
-	// 				break;
-	// 			default:
-	// 				break;
-	// 		}
-	// 		//TODO: step gets updated to slide along the edge
-	// 		slid_point = glm::dot(weights_step, crossed_edge_vector) * glm::normalize(weights_step); // projection onto edge in world coords
-	// 		//TODO: wp.triangle stays the same.
-	// 		wp.weights = computeBaryCoords(wp.triangle, slid_point);
-	// 	} else {
-	// 		//TODO: wp.triangle gets updated to adjacent triangle
-			
-	// 		//TODO: step gets rotated over the edge
-	// 	}
-
 	}
 }

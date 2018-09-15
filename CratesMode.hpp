@@ -43,6 +43,7 @@ struct CratesMode : public Mode {
 		bool backward = false;
 		bool left = false;
 		bool right = false;
+		bool interact = false;
 	} controls;
 
 	bool mouse_captured = false;
@@ -53,8 +54,8 @@ struct CratesMode : public Mode {
 
 	Scene::Camera *camera = nullptr;
 
-	Scene::Object *large_crate = nullptr;
-	Scene::Object *small_crate = nullptr;
+	// Scene::Object *large_crate = nullptr;
+	// Scene::Object *small_crate = nullptr;
 	std::vector<Scene::Object *> objects;
 
 	//when this reaches zero, the 'dot' sample is triggered at the small crate:
@@ -65,6 +66,12 @@ struct CratesMode : public Mode {
 
 	WalkMesh::WalkPoint walk_point;
 
+	float azimuth = 0.0f;
+	float elevation = 0.0f;
+
+	float interaction_distance = 0.5f;
+
+	glm::vec3 player_up, player_forward, player_right;
 	// glm::vec3 player_at;
 	// glm::vec3 *player_at = &player->position;
 	// glm::vec3 player_up{0.0f, 0.0f, 1.0f};

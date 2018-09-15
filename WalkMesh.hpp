@@ -14,7 +14,6 @@ struct WalkMesh {
 	//Walk mesh will keep track of triangles, vertices:
 	std::vector< glm::vec3 > vertices;
 	std::vector< glm::uvec3 > triangles; //CCW-oriented
-	std::vector< uint32_t > triangles_std; //CCW-oriented
 
 	//TODO: consider also loading vertex normals for interpolated "up" direction:
 	//std::vector< glm::vec3 > vertex_normals;
@@ -25,7 +24,6 @@ struct WalkMesh {
 
 	//Construct new WalkMesh and build next_vertex structure:
 	WalkMesh(std::vector< glm::vec3 > const &vertices_, std::vector< glm::uvec3 > const &triangles_);
-	// WalkMesh(std::string const &filename);
 
 	struct WalkPoint {
 		glm::uvec3 triangle = glm::uvec3(-1U); //indices of current triangle
