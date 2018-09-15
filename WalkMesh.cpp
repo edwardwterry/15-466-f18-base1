@@ -24,7 +24,7 @@ WalkMesh::WalkPoint WalkMesh::start(glm::vec3 const &world_point) const {
 glm::vec3 WalkMesh::computeBaryCoords(glm::uvec3 const &tri, glm::vec3 const &pt) const{
 	//based on http://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf p47
 	// std::cout<<"tri: "<<glm::to_string(tri)<<std::endl;
-	// std::cout<<"pt: "<<glm::to_string(pt)<<std::endl;
+	std::cout<<"pt: "<<glm::to_string(pt)<<std::endl;
 	float u, v, w;
 	glm::vec3 v0 = glm::vec3(vertices[tri.y] - vertices[tri.x]);
 	glm::vec3 v1 = glm::vec3(vertices[tri.z] - vertices[tri.x]);
@@ -86,7 +86,7 @@ void WalkMesh::walk(WalkPoint &wp, glm::vec3 const &step) const {
 	glm::vec3 original_walk_result = world_point(wp) + t * step; // in (x,y,z) coordinates
 	//TODO: project step to barycentric coordinates to get weights_step
 	glm::vec3 weights_step = computeBaryCoords(wp.triangle, original_walk_result); // bary if this step is taken
-	while (getCrossedEdge(weights_step) >= 0){ // as long as step takes you outside current triangle
+	while (getCrossedEdge(weights_step) >= 0 && t > 0.0f){ // as long as step takes you outside current triangle
 		t -= 0.05f; // decrement the step scale factor
 		glm::vec3 walk_result = world_point(wp) + t * step; // recalculate (x,y,z) of expected step
 		weights_step = computeBaryCoords(wp.triangle, walk_result); // bary if this step is taken

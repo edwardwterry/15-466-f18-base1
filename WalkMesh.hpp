@@ -46,6 +46,10 @@ struct WalkMesh {
 
 	glm::vec3 world_normal(WalkPoint const &wp) const {
 		//TODO: could interpolate vertex_normals instead of computing the triangle normal:
+		std::cout<<"world norm: "<<glm::to_string(glm::cross(
+			vertices[wp.triangle.y] - vertices[wp.triangle.x],
+			vertices[wp.triangle.z] - vertices[wp.triangle.x]
+		))<<std::endl;
 		return glm::normalize(glm::cross(
 			vertices[wp.triangle.y] - vertices[wp.triangle.x],
 			vertices[wp.triangle.z] - vertices[wp.triangle.x]
