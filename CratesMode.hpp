@@ -17,6 +17,8 @@
 
 #include <vector>
 #include <fstream>
+#include <list>
+#include <algorithm>
 
 // The 'CratesMode' shows scene with some crates in it:
 
@@ -54,27 +56,16 @@ struct CratesMode : public Mode {
 
 	Scene::Camera *camera = nullptr;
 
-	// Scene::Object *large_crate = nullptr;
-	// Scene::Object *small_crate = nullptr;
 	std::vector<Scene::Object *> objects;
-
-	//when this reaches zero, the 'dot' sample is triggered at the small crate:
-	float dot_countdown = 1.0f;
-
-	//this 'loop' sample is played at the large crate:
-	std::shared_ptr< Sound::PlayingSample > loop;
 
 	WalkMesh::WalkPoint walk_point;
 
-	float azimuth = 0.0f;
-	float elevation = 0.0f;
+	float hearing_distance = 3.0f;
+	float interaction_distance = 2.0f;
 
-	float interaction_distance = 0.8f;
+	std::list<int32_t> interaction_record;
+	std::list<int32_t> winning_sequence;
+	int32_t latest_interaction = -1;
 
 	glm::vec3 player_up, player_forward, player_right;
-	// glm::vec3 player_at;
-	// glm::vec3 *player_at = &player->position;
-	// glm::vec3 player_up{0.0f, 0.0f, 1.0f};
-	// glm::vec3 player_forward{1.0f, 0.0f, 0.0f};
-	// glm::vec3 player_right{0.0f, -1.0f, 1.0f};
 };

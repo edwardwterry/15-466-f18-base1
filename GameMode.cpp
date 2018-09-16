@@ -29,32 +29,8 @@
 MeshBuffer::Mesh phone_bank_mesh;
 Load< MeshBuffer > meshes(LoadTagDefault, [](){
 	MeshBuffer const *ret = new MeshBuffer(data_path("monkey.pnc"));
-
-	// tile_mesh = ret->lookup("Tile");
-	// cursor_mesh = ret->lookup("Cursor");
-	// doll_mesh = ret->lookup("Doll");
-	// egg_mesh = ret->lookup("Egg");
-	// cube_mesh = ret->lookup("Cube");
-
-	// phone_bank_mesh = ret->lookup("Cube");
-	phone_bank_mesh = ret->lookup("Monkey");
-
 	return ret;
 });
-
-// std::vector< glm::vec3 > vertices;
-// std::vector< glm::uvec3 > triangles;
-
-
-// Load< WalkMesh > walk_mesh(LoadTagDefault, [](){ // thanks, Jim!
-//     std::ifstream file(data_path("phone-bank-training.walk"), std::ios::binary);
-//     read_chunk(file, "walk", &vertices);
-//     read_chunk(file, "walk", &triangles);
-// // 	WalkMesh const *ret = new WalkMesh(vertices, triangles);
-//     return new WalkMesh(vertices, triangles);
-// // // MeshBuffer const *ret = new MeshBuffer(data_path("monkey.pnc"));
-// // 	return ret;
-// });
 
 Load< GLuint > meshes_for_vertex_color_program(LoadTagDefault, [](){
 	return new GLuint(meshes->make_vao_for_program(vertex_color_program->program));
@@ -141,65 +117,7 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 }
 
 void GameMode::update(float elapsed) {
-	// //if the roll keys are pressed, rotate everything on the same row or column as the cursor:
-	// glm::quat dr = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	// float amt = elapsed * 1.0f;
-	// if (controls.roll_left) {
-	// 	dr = glm::angleAxis(amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
-	// }
-	// if (controls.roll_right) {
-	// 	dr = glm::angleAxis(-amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
-	// }
-	// if (controls.roll_up) {
-	// 	dr = glm::angleAxis(amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
-	// }
-	// if (controls.roll_down) {
-	// 	dr = glm::angleAxis(-amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
-	// }
-	// if (dr != glm::quat()) {
-	// 	for (uint32_t x = 0; x < board_size.x; ++x) {
-	// 		glm::quat &r = board_rotations[cursor.y * board_size.x + x];
-	// 		r = glm::normalize(dr * r);
-	// 	}
-	// 	for (uint32_t y = 0; y < board_size.y; ++y) {
-	// 		if (y != cursor.y) {
-	// 			glm::quat &r = board_rotations[y * board_size.x + cursor.x];
-	// 			r = glm::normalize(dr * r);
-	// 		}
-	// 	}
-	// }
 
-	// if (controls.interact) {
-	// 	// which is the closest light?
-	// 	// start by assuming you're out of range of any
-	// 	uint32_t closest_light = -1;
-	// 	for (uint32_t i = 0; i < num_lights; i++){
-	// 		// get the distance
-	// 		// ASSUMPTION: interaction_distance << 0.5*(distance between closest lights)
-	// 		if (glm::distance(player.position, lights[i].position) <= interaction_distance){
-	// 			// and assign the index
-	// 			closest_light = i;
-	// 		}
-	// 	}
-	// 	// if you were within range of a light
-	// 	if (closest_light >= 0){
-	// 		// add it to the vector of lights you interacted with
-	// 		interaction_record.emplace_back(closest_light);
-	// 		// TODO: play its corresponding sound
-	// 	}
-	// }
-
-	// // compare this to the reference vector
-	// // if the last light you interacted with is the same as the corresponding one in the ref sequence
-	// if (interaction_record.back() == light_sequence[interaction_record.size()]) {
-	// 	// if you are at the last in the sequence
-	// 	if (interaction_record.size() == sequence_length){
-	// 		add_to_sequence();
-	// 	}
-	// } else {
-	// 	reset_sequence();
-	// 	// TODO: play fail sound
-	// }
 }
 
 void GameMode::draw(glm::uvec2 const &drawable_size) {
@@ -293,7 +211,7 @@ void GameMode::draw(glm::uvec2 const &drawable_size) {
 
 	if (Mode::current.get() == this) {
 		glDisable(GL_DEPTH_TEST);
-		std::string message = "PRESS ESC FOR MENU";
+		std::string message = "PRESS ESC TO ENTER GAME";
 		float height = 0.06f;
 		float width = text_width(message, height);
 		draw_text(message, glm::vec2(-0.5f * width,-0.99f), height, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
@@ -316,7 +234,7 @@ void GameMode::show_pause_menu() {
 	menu->choices.emplace_back("RESUME", [game](){
 		Mode::set_current(game);
 	});
-	menu->choices.emplace_back("CRATES", [game](){
+	menu->choices.emplace_back("PHONE BANK", [game](){
 		Mode::set_current(std::make_shared< CratesMode >());
 	});
 	menu->choices.emplace_back("QUIT", [](){

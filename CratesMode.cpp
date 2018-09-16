@@ -46,7 +46,6 @@ Load< WalkMesh > walk_mesh(LoadTagDefault, [](){ // thanks, Jim!
 
 	for(auto v : vertex_data){
 		vertices.emplace_back(v.Position);
-		std::cout<<glm::to_string(v.Position)<<std::endl;
 	}
 
 	struct Triangle {
@@ -162,24 +161,19 @@ CratesMode::CratesMode() {
 			transform->rotation = entry.rotation;
 			transform->scale = entry.scale;
 			std::string name(&string_data[0].name + entry.indices.name_begin, &string_data[0].name + entry.indices.name_end);
-			std::cout<<name<<std::endl;
 			// based on https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
 			// find the meshes associated with objects (i.e. without *.nnn)
+			if (name.find("RailColumn.024") != std::string::npos) {
+				sound_locations.emplace_back(entry.position);
+			}		
 			if (name.find("RailColumn.001") != std::string::npos) {
 				sound_locations.emplace_back(entry.position);
-				std::cout<<"col1"<<std::endl;
-			}		
-			if (name.find("RailColumn.002") != std::string::npos) {
-				sound_locations.emplace_back(entry.position);
-				std::cout<<"col2"<<std::endl;
-			}		
-			if (name.find("RailColumn.003") != std::string::npos) {
-				sound_locations.emplace_back(entry.position);
-				std::cout<<"col3"<<std::endl;
 			}		
 			if (name.find("RailColumn.004") != std::string::npos) {
 				sound_locations.emplace_back(entry.position);
-				std::cout<<"col4"<<std::endl;
+			}		
+			if (name.find("RailColumn.019") != std::string::npos) {
+				sound_locations.emplace_back(entry.position);
 			}	
 			if (name.find(".") != std::string::npos) {
 				uint32_t index = static_cast<uint32_t> (name.find("."));
@@ -214,6 +208,10 @@ CratesMode::CratesMode() {
 		//camera looks down -z, so right is +x:
 		Sound::listener.set_right( glm::normalize(cam_to_world[0]) );
 	}	
+
+	for (int32_t i = 0; i < 4; i++){
+		winning_sequence.push_back(i);
+	}
 }
 
 CratesMode::~CratesMode() {
@@ -297,23 +295,39 @@ void CratesMode::update(float elapsed) {
 	}
 
 	if (controls.interact) {
-		for (uint32_t i = 0; i < sound_locations.size(); i++){
+		for (int32_t i = 0; i < sound_locations.size(); i++){
 			if (glm::distance(sound_locations[i], player->position) <= interaction_distance){
 				switch (i){
 					case 0:
-						note1->play(camera->transform->position);
+						note1->play(sound_locations[i]);
 						break;
 					case 1:
-						note2->play(camera->transform->position);
+						note2->play(sound_locations[i]);
 						break;
 					case 2:
-						note3->play(camera->transform->position);
+						note3->play(sound_locations[i]);
 						break;
 					case 3:
-						note4->play(camera->transform->position);
+						note4->play(sound_locations[i]);
 						break;
 					default:
 						break;						
+				}
+				// if (glm::distance(sound_locations[i], player->position) <= interaction_distance){
+					if (interaction_record.size() >= 4){
+						interaction_record.pop_front();
+					}
+					latest_interaction = i;
+
+					if (interaction_record.back() != latest_interaction){
+						interaction_record.emplace_back(i);
+					}
+				if (interaction_record == winning_sequence){
+					note1->play(camera->transform->position, 0.5f, Sound::Once);
+					note2->play(camera->transform->position, 0.5f, Sound::Once);
+					note3->play(camera->transform->position, 0.5f, Sound::Once);
+					note4->play(camera->transform->position, 0.5f, Sound::Once);	
+					std::cout<<"YOU WIN!"<<std::endl;				
 				}
 			}
 		}

@@ -32,7 +32,7 @@
 int main(int argc, char **argv) {
 	struct {
 		//TODO: this is where you set the title and size of your game window
-		std::string title = "Training for a Job at the Orbital Phone Bank";
+		std::string title = "Another Infinite Night At The Orbital Phone Bank";
 		glm::uvec2 size = glm::uvec2(640, 400);
 	} config;
 
