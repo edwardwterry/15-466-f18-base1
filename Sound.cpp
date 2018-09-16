@@ -92,8 +92,8 @@ void compute_pan_from_listener_and_position(
 		// but I'm going to use linear because it's sounds better to me.
 		// (feel free to change it, of course)
 		if (distance > 1.0f) {
-			*volume_left /= distance;
-			*volume_right /= distance;
+			*volume_left /= std::pow(distance, 2.0f);
+			*volume_right /= std::pow(distance, 2.0f);
 		}
 	}
 }

@@ -21,10 +21,8 @@ struct WalkMesh {
 	//This "next vertex" map includes [a,b]->c, [b,c]->a, and [c,a]->b for each triangle, and is useful for checking what's over an edge from a given point:
 	std::unordered_map< glm::uvec2, uint32_t > next_vertex;
 
-
 	//Construct new WalkMesh and build next_vertex structure:
 	WalkMesh(std::vector< glm::vec3 > const &vertices_, std::vector< glm::uvec3 > const &triangles_);
-	// WalkMesh(std::string const &filename);
 
 	struct WalkPoint {
 		glm::uvec3 triangle = glm::uvec3(-1U); //indices of current triangle
@@ -46,7 +44,6 @@ struct WalkMesh {
 	}
 
 	glm::vec3 world_normal(WalkPoint const &wp) const {
-		//TODO: could interpolate vertex_normals instead of computing the triangle normal:
 		return glm::normalize(glm::cross(
 			vertices[wp.triangle.y] - vertices[wp.triangle.x],
 			vertices[wp.triangle.z] - vertices[wp.triangle.x]
@@ -58,40 +55,3 @@ struct WalkMesh {
 	glm::vec3 computeBaryCoords(glm::uvec3 const &triangle, glm::vec3 const &world_point) const;
 
 };
-
-/*
-// The intent is that game code will work something like this:
-
-Load< WalkMesh > walk_mesh;
-
-Game {
-	WalkPoint walk_point;
-}
-Game::Game() {
-	//...
-	walk_point = walk_mesh->start(level_start_position);
-}
-
-Game::update(float elapsed) {
-	//update position on walk mesh:
-	glm::vec3 step = player_forward * speed * elapsed;
-	walk_mesh->walk(walk_point, step);
-
-	//update player position:
-	player_at = walk_mesh->world_point(walk_point);
-
-	//update player orientation:
-	glm::vec3 old_player_up = player_up;
-	player_up = walk_mesh->world_normal(walk_point);
-
-	glm::quat orientation_change = (compute rotation that takes old_player_up to player_up)
-	player_forward = orientation_change * player_forward;
-
-	//make sure player_forward is perpendicular to player_up (the earlier rotation should ensure that, but it might drift over time):
-	player_forward = glm::normalize(player_forward - player_up * glm::dot(player_up, player_forward));
-
-	//compute rightward direction from forward and up:
-	player_right = glm::cross(player_forward, player_up);
-
-}
-*/

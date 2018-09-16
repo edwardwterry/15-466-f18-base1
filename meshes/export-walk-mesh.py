@@ -88,7 +88,7 @@ vtx = b''
 strings = b''
 
 #index gives offsets into the data (and names) for each mesh:
-pol = b''
+tri = b''
 
 #index gives offsets into the data (and names) for each mesh:
 index = b''
@@ -128,11 +128,11 @@ for obj in bpy.data.objects:
 	mesh.calc_normals_split()
 
 	#record mesh name, start position and vertex count in the index:
-	name_begin = len(strings)
-	strings += bytes(name, "utf8")
-	name_end = len(strings)
-	index += struct.pack('I', name_begin)
-	index += struct.pack('I', name_end)
+	# name_begin = len(strings)
+	# strings += bytes(name, "utf8")
+	# name_end = len(strings)
+	# index += struct.pack('I', name_begin)
+	# index += struct.pack('I', name_end)
 
 	# index += struct.pack('I', vertex_count) #vertex_begin
 	#...count will be written below
@@ -145,15 +145,15 @@ for obj in bpy.data.objects:
 		for x in v.co:
 			# print(x)
 			vtx += struct.pack('f', x)
-		for x in v.normal:
-			# print(x)
-			vtx += struct.pack('f', x)
+		# for x in v.normal:
+		# 	# print(x)
+		# 	vtx += struct.pack('f', x)
 
-	for p in mesh.polygons:
-		pol += struct.pack('I', p.index)
-		# print (p.index)
-		for v in p.vertices:
-			pol += struct.pack('I', v)	
+	for t in mesh.polygons:
+		tri += struct.pack('I', t.index)
+		# print (t.index)
+		for v in t.vertices:
+			tri += struct.pack('I', v)	
 			# print (v)
 
 #check that we wrote as much data as anticipated:
@@ -166,14 +166,14 @@ blob = open(outfile, 'wb')
 # blob.write(struct.pack('4s',b'str0')) #type
 # blob.write(struct.pack('I', len(strings))) #length
 # blob.write(strings)
-#second chunk: the polygons
-blob.write(struct.pack('4s',b'pol0')) #type
-blob.write(struct.pack('I', len(pol))) #length
-blob.write(pol)
 #third chunk: the vertices
 blob.write(struct.pack('4s',b'vtx0')) #type
 blob.write(struct.pack('I', len(vtx))) #length
 blob.write(vtx)
+#second chunk: the triangles
+blob.write(struct.pack('4s',b'tri0')) #type
+blob.write(struct.pack('I', len(tri))) #length
+blob.write(tri)
 # #fourth chunk: the indices
 # blob.write(struct.pack('4s',b'idx0')) #type
 # blob.write(struct.pack('I', len(index))) #length

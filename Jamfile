@@ -70,6 +70,7 @@ NAMES =
 	draw_text
 	Sound
 	WalkMesh
+	quaternion_utils
 	;
 
 if $(OS) = NT {

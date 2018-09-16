@@ -86,7 +86,7 @@ extern struct Listener listener;
 
 
 
-constexpr const uint32_t AudioRate = 48000; //sample rate, in Hz, for audio output
+constexpr const uint32_t AudioRate = 44100; //sample rate, in Hz, for audio output
 constexpr const uint32_t MixSamples = 1024; //samples to mix at once; SDL requires a power of two; smaller values mean more reactive sound, but require more frequent audio callback invocation
 
 void init(); //should call Sound::init() from main.cpp before using any member functions
