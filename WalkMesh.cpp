@@ -24,7 +24,7 @@ WalkMesh::WalkPoint WalkMesh::start(glm::vec3 const &world_point) const {
 glm::vec3 WalkMesh::computeBaryCoords(glm::uvec3 const &tri, glm::vec3 const &pt) const{
 	//based on http://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf p47
 	// std::cout<<"tri: "<<glm::to_string(tri)<<std::endl;
-	std::cout<<"pt: "<<glm::to_string(pt)<<std::endl;
+	// std::cout<<"pt: "<<glm::to_string(pt)<<std::endl;
 	float u, v, w;
 	glm::vec3 v0 = glm::vec3(vertices[tri.y] - vertices[tri.x]);
 	glm::vec3 v1 = glm::vec3(vertices[tri.z] - vertices[tri.x]);
@@ -90,8 +90,8 @@ void WalkMesh::walk(WalkPoint &wp, glm::vec3 const &step) const {
 		t -= 0.05f; // decrement the step scale factor
 		glm::vec3 walk_result = world_point(wp) + t * step; // recalculate (x,y,z) of expected step
 		weights_step = computeBaryCoords(wp.triangle, walk_result); // bary if this step is taken
+		// std::cout<<"t: "<<t<<std::endl;
 	}
-	// std::cout<<"t: "<<t<<std::endl;
 	// std::cout<<"weights_step: "<<glm::to_string(weights_step)<<std::endl;
 	// glm::vec3 weights_update = wp.weights + t * weights_step; // use the one which will keep you inside triangle
 	if (t >= 1.0f) { 

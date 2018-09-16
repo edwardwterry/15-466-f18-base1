@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <math.h>
 #include <cstddef>
 #include <random>
 
@@ -103,7 +104,6 @@ CratesMode::CratesMode() {
 			uint32_t name_begin, name_end;
 		};
 
-		// static_assert(sizeof(IndexEntry) == 2*4, "Index entry should be packed");
 		std::vector<SceneString> string_data;
 		read_chunk(file, "str0", &string_data);
 
@@ -114,10 +114,8 @@ CratesMode::CratesMode() {
 			glm::quat rotation;
 			glm::vec3 scale;
 		};
-		// static_assert(sizeof(SceneTransform) == 1*4+2*4+3*4+4*4+3*4, "Index entry should be packed");
 		std::vector<SceneTransform> transform_data;
 		read_chunk(file, "xfh0", &transform_data);
-		// std::cout<<"num transforms: "<<transform_data.size()<<std::endl;
 
 		struct SceneMesh{
 			uint32_t ref;
@@ -193,25 +191,10 @@ CratesMode::CratesMode() {
 
 	{ // Player transform
 		player = scene.new_transform();
-		// std::cout<<"here1"<<std::endl;
 		player->position = glm::vec3(0.0f, 0.0f, 0.0f);
-		// player->rotation = glm::quat_cast(
-		// 	glm::mat3(glm::vec3(-1.0f, 0.0f, 0.0f), 
-		// 			  glm::vec3(0.0f, -1.0f, 0.0f), 
-		// 			  glm::vec3(0.0f, 0.0f, -1.0f)));
 		player_up = glm::mat3_cast(player->rotation)[2];
 		player_forward = glm::mat3_cast(player->rotation)[1];
-		// player_up = glm::mat3_cast(player->rotation)[1];
-		// player_forward = glm::mat3_cast(player->rotation)[1];
 		player_right = glm::mat3_cast(player->rotation)[0];
-		// std::cout<<"player_up init: "<<glm::to_string(player_up)<<std::endl;
-		// player->rotation = glm::quat_cast(glm::inverse(glm::mat3(
-		// 	glm::vec3(0.0f, 1.0f, 0.0f),
-		// 	glm::vec3(1.0f, 0.0f, 0.0f),
-		// 	glm::vec3(0.0f, 0.0f, -1.0f))));
-		// player->rotation = glm::angleAxis(glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f))
-		// 	* glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-		// std::cout<<"start pos1: "<<&player<<std::endl;
 	}
 
 	{ //Camera looking at the origin:
@@ -223,14 +206,7 @@ CratesMode::CratesMode() {
 		camera->transform->set_parent(player);
 	}
 
-
-	//start the 'loop' sample playing at the large crate:
-	// loop = sample_loop->play(objects[0]->transform->position, 1.0f, Sound::Loop);
-	// std::cout<<"here5"<<std::endl;
-	// std::cout<<"start pos2: "<<&player<<std::endl;
-
 	walk_point = walk_mesh->start(player->position);
-	// std::cout<<"walk_point at init: "<<glm::to_string(walk_point)<<std::endl;
 
 	{ //set sound positions:
 		glm::mat4 cam_to_world = camera->transform->make_local_to_world();
@@ -241,7 +217,6 @@ CratesMode::CratesMode() {
 }
 
 CratesMode::~CratesMode() {
-	// if (loop) loop->stop();
 }
 
 bool CratesMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -269,7 +244,6 @@ bool CratesMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 	if (evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.scancode == SDL_SCANCODE_SPACE) {
 			controls.interact = (evt.type == SDL_KEYDOWN);
-			// std::cout<<"space!"<<std::endl;
 			return true;
 		}			
 	}
@@ -299,13 +273,11 @@ bool CratesMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 			pitch = -pitch;
 			camera->transform->rotation = glm::normalize(
 				camera->transform->rotation
-				// * glm::angleAxis(yaw, glm::vec3(0.0f, 1.0f, 0.0f))
 				* glm::angleAxis(pitch, glm::vec3(1.0f, 0.0f, 0.0f))
 			);
 			player->rotation = glm::normalize(
 				player->rotation 
 				* glm::angleAxis(yaw, glm::vec3(0.0f, 0.0f, 1.0f))
-				// * glm::angleAxis(pitch, glm::vec3(1.0f, 0.0f, 0.0f))
 			);
 			return true;
 		}
@@ -313,35 +285,9 @@ bool CratesMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 	return false;
 }
 
-// void CratesMode::update(float elapsed) {
-// 	glm::mat3 directions = glm::mat3_cast(camera->transform->rotation);
-// 	// std::cout<<"Directions: "<<glm::to_string(directions)<<std::endl;
-// 	float amt = 5.0f * elapsed;
-// 	// if (controls.right) camera->transform->position += amt * directions[0];
-// 	// if (controls.left) camera->transform->position -= amt * directions[0];
-// 	// if (controls.backward) camera->transform->position += amt * directions[2];
-// 	// if (controls.forward) camera->transform->position -= amt * directions[2];
-// 	// std::cout<<"camera pos: "<<glm::to_string(camera->transform->position)<<std::endl;
-// 	// glm::mat3 directions = glm::mat3_cast(player->rotation);
-// 	if (controls.right) player->position -= amt * directions[0];
-// 	if (controls.left) player->position += amt * directions[0];
-// 	if (controls.backward) player->position -= amt * directions[2];
-// 	if (controls.forward) player->position += amt * directions[2];
-// 	std::cout<<"player pos: "<<glm::to_string(player->position)<<std::endl;
-
-
-
-// 	// dot_countdown -= elapsed;
-// 	// if (dot_countdown <= 0.0f) {
-// 	// 	dot_countdown = (rand() / float(RAND_MAX) * 2.0f) + 0.5f;
-// 	// 	glm::mat4x3 small_crate_to_world = small_crate->transform->make_local_to_world();
-// 	// 	sample_dot->play( small_crate_to_world * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) );
-// 	// }
-
 void CratesMode::update(float elapsed) {
 	glm::mat3 directions = glm::mat3_cast(player->rotation);
 	float amt = 3.0f * elapsed;
-	float yaw_amt = 0.01f;
 	glm::vec3 step = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (controls.forward) {
 		step += directions[1] * amt;
@@ -350,33 +296,9 @@ void CratesMode::update(float elapsed) {
 		step -= directions[1] * amt;
 	}
 
-	// { //set sound positions:
-	// 	glm::mat4 cam_to_world = camera->transform->make_local_to_world();
-	// 	Sound::listener.set_position( cam_to_world[3] );
-	// 	//camera looks down -z, so right is +x:
-	// 	Sound::listener.set_right( glm::normalize(cam_to_world[0]) );
-	// 	if (loop) {
-	// 		glm::mat4 large_crate_to_world = large_crate->transform->make_local_to_world();
-	// 		loop->set_position( large_crate_to_world * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) );
-	// 	}
-	// }
-	// dot_countdown -= elapsed;
-	// if (dot_countdown <= 0.0f) {
-	// 	dot_countdown = (rand() / float(RAND_MAX) * 2.0f) + 0.5f;
-	// 	glm::mat4x3 small_crate_to_world = small_crate->transform->make_local_to_world();
-	// 	sample_dot->play( small_crate_to_world * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) );
-	// } 
-
 	if (controls.interact) {
-		// std::cout<<"spacebar hit"<<std::endl;
-		// note4->play(camera->transform->position);
 		for (uint32_t i = 0; i < sound_locations.size(); i++){
-			glm::vec3 sound_loc = sound_locations[i];
-			glm::vec3 pl = player->position;
-			std::cout<<"sound_locations"<<glm::to_string(sound_loc)<<std::endl;
-			std::cout<<"pl"<<glm::to_string(pl)<<std::endl;
-			std::cout<<"dist"<<glm::distance(sound_loc, pl)<<std::endl;
-			if (glm::distance(sound_loc, pl) <= interaction_distance){
+			if (glm::distance(sound_locations[i], player->position) <= interaction_distance){
 				switch (i){
 					case 0:
 						note1->play(camera->transform->position);
@@ -396,57 +318,27 @@ void CratesMode::update(float elapsed) {
 			}
 		}
 	}
-	// if (controls.right) {
-	// 	azimuth -= yaw_amt;
-	// }
-	// if (controls.left) {
-	// 	azimuth += yaw_amt;
-	// }
 
-	// player->rotation = glm::normalize(glm::angleAxis(azimuth, player_up));
 	walk_mesh->walk(walk_point, step);
 	player->position = walk_mesh->world_point(walk_point);
-	// std::cout<<"step :"<<glm::to_string(step)<<std::endl;
-	// std::cout<<"player_pos: "<<glm::to_string(walk_mesh->world_point(walk_point))<<std::endl;
-	// std::cout<<"on tri: "<<glm::to_string(walk_point.triangle)<<std::endl;
 
 	// update player yaw
-	// player->rotation = glm::quat_cast(glm::mat3(player_right, player_forward, player_up));
-
 	player_right = glm::mat3_cast(player->rotation)[0];
 	player_forward = glm::mat3_cast(player->rotation)[1];
 
 	//update player orientation:
 	glm::vec3 old_player_up = player_up;
 	player_up = walk_mesh->world_normal(walk_point);
-	// std::cout<<"player->rotation: "<<glm::to_string(glm::mat3_cast(player->rotation))<<std::endl;
-	// std::cout<<"player_up: "<<glm::to_string(player_up)<<std::endl;
-	// std::cout<<"player_up diff: "<<glm::to_string(player_up-old_player_up)<<std::endl;
 
-	// glm::vec3 *temp = &player->rotation;
 	// based on https://stackoverflow.com/questions/31064234/find-the-angle-between-two-vectors-from-an-arbitrary-origin
-	// glm::quat orientation_change = RotationBetweenVectors(old_player_up, player_up);
-	float orientation_change = glm::acos(glm::dot(old_player_up, player_up));
-	// std::cout<<"orientation_change: "<<orientation_change<<std::endl;
-	// std::cout<<"orientation_change: "<<glm::to_string(orientation_change)<<std::endl;
-	// glm::quat q = player->rotation;
-	// float yaw = glm::atan(2*(q.w*q.z+q.x*q.y),1-2*(std::pow(q.y,2)+std::pow(q.z,2)));
-	// std::cout<<"yaw: "<<yaw<<std::endl;
-	// player_forward = glm::angleAxis(azimuth, player_up) * glm::angleAxis(orientation_change, glm::cross(player_up, old_player_up)) * player_forward;
-	// player_forward = glm::angleAxis(yaw, player_up) * glm::angleAxis(orientation_change, glm::cross(player_up, old_player_up)) * player_forward;
-	player_forward = glm::angleAxis(orientation_change, glm::cross(player_up, old_player_up)) * player_forward;
-	// float yaw = 
-	// player_forward = orientation_change * player_forward;// * glm::angleAxis(azimuth, player_up);// * directions[1];
-	// std::cout<<"directions[1]: "<<glm::to_string(directions[1])<<std::endl;
+	glm::quat orientation_change = RotationBetweenVectors(old_player_up, player_up);
+	player_forward = orientation_change * player_forward;
 
 	//make sure player_forward is perpendicular to player_up (the earlier rotation should ensure that, but it might drift over time):
-	// player_forward = glm::normalize(player_forward - player_up * glm::dot(player_up, player_forward));
+	player_forward = glm::normalize(player_forward - player_up * glm::dot(player_up, player_forward));
 
 	//compute rightward direction from forward and up:
 	player_right = glm::cross(player_forward, player_up);
-	// std::cout<<"player_right: "<<glm::to_string(player_right)<<std::endl;
-	// std::cout<<"mat3: "<<glm::to_string(glm::mat3(player_right, player_forward, player_up))<<std::endl;
-
 
 	player->rotation = glm::quat_cast(glm::mat3(player_right, player_forward, player_up));
 }

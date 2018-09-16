@@ -69,7 +69,7 @@ struct CratesMode : public Mode {
 	float azimuth = 0.0f;
 	float elevation = 0.0f;
 
-	float interaction_distance = 0.5f;
+	float interaction_distance = 0.8f;
 
 	glm::vec3 player_up, player_forward, player_right;
 	// glm::vec3 player_at;

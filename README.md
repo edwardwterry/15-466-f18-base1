@@ -1,9 +1,8 @@
 # Game Information
-(Note: fill in this portion with information about your game.)
 
-Title: (TODO: your game's title)
+Title: Training for a Job Writing Software for the Orbital Phone Bank
 
-Author: (TODO: your name)
+Author: Edward Terry
 
 Design Document: [TODO: name of design document](TODO: link to design document)
 
@@ -13,15 +12,19 @@ Screen Shot:
 
 How To Play:
 
-TODO: describe the controls and (if needed) goals/strategy.
+W: Forward, S: Backward. Spacebar next to a rail post may activate a sound! Look around the scene by pointing your mouse. 
 
 Changes From The Design Document:
 
-TODO: what did you need to add/remove/modify from the original design? Why?
+I had planned to extend Training for a Job at the Orbital Phone Bank but got so stuck on the basic elements that I wasn't able to build an actual game experience. So I've renamed it "Training for a Job Writing Software for the Orbital Phone Bank". It took several days just working out how to parse the data from the exported scene file and to write my own exporter for the walk mesh. Then it was a whole other drama importing the walk mesh, followed by an (incomplete) phase of debugging to work out why the game crashes when you move beyond the flat starting platform. I did put in some token sound assets which I made, to prove that I could do it! 
 
 Good / Bad / Ugly Code:
 
-TODO: provide examples of code you wrote from this project that you think is good (elegant, simple, useful), bad (hack-y, brittle, unreadable), and ugly (particularly inelegant). Provide a sentence or two of justification for the examples.
+There is a lot of bad and ugly code here but I am happy with the way I organized the functions to work out which edge was crossed, and the subsequent search through the neighboring triangle vertices, including rotating combinations of their order. This is the first time I'd worked with the std::unordered_map feature and was content with how I was able to use it. 
+
+On the bad and ugly side, I think I missed the potentially elegant way of adjusting step geometry in the event of edge crossings. I think there is a degree of redundancy in, say, WalkMesh.cpp where the same operation is performed three times, just in a different order. I'd like to learn how to exploit the "ordered-ness" between struct elements, even when they are not in an easy-to-manipulate data structure. 
+
+I omitted the behavior to slide along an edge because I was having trouble with consistency of vector directions for the slide to project upon.
 
 # Using This Base Code
 
